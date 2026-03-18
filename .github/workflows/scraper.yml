@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '30 2 * * 1-5'   # 8:00 AM IST  Mon-Fri
     - cron: '30 7 * * 1-5'   # 1:00 PM IST  Mon-Fri
-  workflow_dispatch:           # Manual trigger anytime
+  workflow_dispatch:
 
 jobs:
   scrape-and-alert:
@@ -21,7 +21,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: 🔧 Fix Ubuntu System Packages
+      - name: 📦 Install Python Packages
+        run: pip install playwright==1.42.0
+
+      - name: 🎭 Install Chromium + Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -37,22 +40,17 @@ jobs:
             libxfixes3 \
             libxrandr2 \
             libgbm1 \
-            libasound2t64 \
             libpango-1.0-0 \
             libcairo2 \
-            libatspi2.0-0
-
-      - name: 📦 Install Python Packages
-        run: pip install playwright==1.42.0
-
-      - name: 🎭 Install Playwright Chromium Only
-        run: playwright install chromium
+            libatspi2.0-0 \
+            libasound2
+          playwright install chromium
 
       - name: 🤖 Run Career Scraper Bot
         env:
-          FROM_EMAIL:          ${{ secrets.FROM_EMAIL }}
-          TO_EMAIL:            ${{ secrets.TO_EMAIL }}
-          GMAIL_APP_PASSWORD:  ${{ secrets.GMAIL_APP_PASSWORD }}
+          FROM_EMAIL:         ${{ secrets.FROM_EMAIL }}
+          TO_EMAIL:           ${{ secrets.TO_EMAIL }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: python main.py
 
       - name: ✅ Done
@@ -61,4 +59,4 @@ jobs:
 
       - name: ❌ Show Error
         if: failure()
-        run: echo "Bot failed — check logs above for details"
+        run: echo "Bot failed — check logs above"
