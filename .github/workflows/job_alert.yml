@@ -1,0 +1,33 @@
+name: Daily Job Alert Bot
+
+on:
+  schedule:
+    - cron: '30 2 * * 1-5'
+    - cron: '30 7 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  run-job-alert:
+    name: Fetch Jobs & Send Email Alert
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Job Alert Bot
+        env:
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+          FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+          TO_EMAIL: ${{ secrets.TO_EMAIL }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: node src/job_checker.js
